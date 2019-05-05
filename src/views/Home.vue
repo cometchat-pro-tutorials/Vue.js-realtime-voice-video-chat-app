@@ -16,7 +16,7 @@
       
 
       <button  @click="startVideoChat" class="btn btn-secondary"> Start Call <span v-if="showSpinner" class="fa fa-spin fa-spinner"></span> </button>
-      <button class="btn btn-success" @click="acceptCall">Accept Call</button>  
+      <button class="btn btn-success" @click="acceptCall" v-if="incomingCall">Accept Call</button>  
     </div>
 
     <div id="callScreen"></div>
@@ -38,11 +38,13 @@ export default {
       session_id: "",
       receiver_id: null,
       error: false,
-      showSpinner: false
+      showSpinner: false,
+      incomingCall: false
     };
   },
   created() {
     this.getLoggedInUser();
+    let globalContext = this;
 
     var listnerID = "UNIQUE_LISTENER_ID";
     CometChat.addCallListener(
@@ -50,7 +52,9 @@ export default {
       new CometChat.CallListener({
         onIncomingCallReceived(call) {
           console.log("Incoming call:", call);
-          this.session_id = call.sessionId;
+          globalContext.incomingCall = true;
+          globalContext.session_id = call.sessionId;
+          // this.session_id = call.sessionId;
         },
         onOutgoingCallAccepted(call) {
           console.log("Outgoing call accepted:", call);
