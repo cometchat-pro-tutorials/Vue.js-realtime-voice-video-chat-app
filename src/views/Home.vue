@@ -14,9 +14,19 @@
         <input type="text" class="form-control" placeholder="Enter receiver UID" v-model="receiver_id">
       </div>
       
+        <div v-if="incomingCall">
+          <button class="btn btn-success" @click="acceptCall">Accept Call</button>  
+          <button class="btn btn-success" @click="rejectCall">Reject Call</button> 
+        </div>
 
-      <button  @click="startVideoChat" class="btn btn-secondary"> Start Call <span v-if="showSpinner" class="fa fa-spin fa-spinner"></span> </button>
-      <button class="btn btn-success" @click="acceptCall" v-if="incomingCall">Accept Call</button>  
+        <div v-else-if="ongoingCall">
+          <button class="btn btn-secondary"> Ongoing Call ... </button>
+        </div>
+
+        <div v-else>
+          <button  @click="startVideoChat" class="btn btn-secondary"> Start Call <span v-if="showSpinner" class="fa fa-spin fa-spinner"></span> </button>
+        </div>
+
     </div>
 
     <div id="callScreen"></div>
@@ -24,8 +34,6 @@
 </template>
 
 <script>
-//Get login user from comet chat
-
 // @ is an alias to /src
 import { CometChat } from "@cometchat-pro/chat";
 
@@ -39,7 +47,8 @@ export default {
       receiver_id: null,
       error: false,
       showSpinner: false,
-      incomingCall: false
+      incomingCall: false,
+      ongoingCall: false
     };
   },
   created() {
@@ -54,10 +63,11 @@ export default {
           console.log("Incoming call:", call);
           globalContext.incomingCall = true;
           globalContext.session_id = call.sessionId;
-          // this.session_id = call.sessionId;
         },
+
         onOutgoingCallAccepted(call) {
           console.log("Outgoing call accepted:", call);
+          globalContext.ongoingCall = true;
           CometChat.startCall(
             call.sessionId,
             document.getElementById("callScreen"),
@@ -73,6 +83,8 @@ export default {
                 /* this method can be use to display message or perform any actions if someone leaving the call */
               },
               onCallEnded: call => {
+                globalContext.ongoingCall = false;
+                globalContext.incomingCall = false;
                 /* Notification received here if current ongoing call is ended. */
                 console.log("Call ended:", call);
                 /* hiding/closing the call screen can be done here. */
@@ -83,6 +95,9 @@ export default {
         },
         onOutgoingCallRejected(call) {
           console.log("Outgoing call rejected:", call);
+          this.incomingCall = false;
+          this.ongoingCall = false;
+          this.receiver_id = "";
           // Outgoing Call Rejected
         },
         onIncomingCallCancelled(call) {
@@ -97,10 +112,8 @@ export default {
         user => {
           this.username = user.name;
           this.uid = user.uid;
-          console.log("Users details:", { user });
         },
         error => {
-          console.log("Error getting details:", { error });
           this.$router.push({ name: "homepage" });
         }
       );
@@ -141,12 +154,16 @@ export default {
       );
     },
     acceptCall() {
-      // var sessionID = "SESSION_ID";
-
-      CometChat.acceptCall(this.session_id).then(
+      let globalContext = this;
+      this.ongoingCall = true;
+      this.incomingCall = false;
+      var sessionID = this.session_id;
+      CometChat.acceptCall(sessionID).then(
         call => {
           console.log("Call accepted successfully:", call);
+          console.log("call accepted now....");
           // start the call using the startCall() method
+          console.log(globalContext.ongoingCall);
           CometChat.startCall(
             call.sessionId,
             document.getElementById("callScreen"),
@@ -164,6 +181,8 @@ export default {
               onCallEnded: call => {
                 /* Notification received here if current ongoing call is ended. */
                 console.log("Call ended:", call);
+                globalContext.ongoingCall = false;
+                globalContext.incomingCall = false;
                 /* hiding/closing the call screen can be done here. */
               }
             })
@@ -172,6 +191,24 @@ export default {
         error => {
           console.log("Call acceptance failed with error", error);
           // handle exception
+        }
+      );
+    },
+
+    rejectCall() {
+      var sessionID = this.session_id;
+      var globalContext = this;
+      var status = CometChat.CALL_STATUS.REJECTED;
+
+      CometChat.rejectCall(sessionID, status).then(
+        call => {
+          console.log("Call rejected successfully", call);
+          globalContext.incomingCall = false;
+          globalContext.ongoingCall = false;
+          globalContext.receiver_id = "";
+        },
+        error => {
+          console.log("Call rejection failed with error:", error);
         }
       );
     }

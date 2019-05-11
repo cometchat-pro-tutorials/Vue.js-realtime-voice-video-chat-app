@@ -1,10 +1,11 @@
 <template>
     <div id="auth">
         <div id="nav">
-          <router-link to="/login">Login</router-link> |
+          <router-link to="/login">Login</router-link> 
         </div>
     
         <p> Enter your username to start video chat </p>
+        <p>Create an account through your CometChat dashboard or login with one of our test users (superhero1, superhero2)</p>
 
         <form v-on:submit.prevent="authLoginUser">
             <div class="form-group">
@@ -42,7 +43,6 @@ export default {
         error => {
           this.showSpinner = false;
           console.log("Login failed with error:", error.code);
-          // check error message and create a new user
         }
       );
     }
