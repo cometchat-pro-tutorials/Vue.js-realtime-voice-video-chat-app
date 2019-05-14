@@ -20,7 +20,6 @@ export default {
   methods: {
     initializeApp() {
       var appID = process.env.VUE_APP_COMMETCHAT_APP_ID;
-      var apiKey = process.env.VUE_APP_COMMETCHAT_API_KEY;
 
       CometChat.init(appID).then(
         () => {
