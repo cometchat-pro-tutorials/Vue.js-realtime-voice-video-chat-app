@@ -108,13 +108,14 @@ export default {
   },
   methods: {
     getLoggedInUser() {
-      var user = CometChat.getLoggedinUser().then(
+      CometChat.getLoggedinUser().then(
         user => {
           this.username = user.name;
           this.uid = user.uid;
         },
         error => {
           this.$router.push({ name: "homepage" });
+          console.log(error);
         }
       );
     },
@@ -124,6 +125,7 @@ export default {
         success => {
           console.log("Logout completed successfully");
           this.$router.push({ name: "homepage" });
+          console.log(success);
         },
         error => {
           //Logout failed with exception
