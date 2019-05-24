@@ -2,7 +2,7 @@
 
 Read the full tutorial here:
 
->> Not yet published
+https://www.cometchat.com/tutorials/build-a-voice-and-video-chat-app-with-vue-js-and-cometchat/
 
 This application shows you how to add voice and video chat to your web application using Vue.js and CometChat. Take a look at the screenshot below:
 
